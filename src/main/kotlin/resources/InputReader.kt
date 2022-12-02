@@ -4,7 +4,7 @@ import java.io.File
 
 object InputReader {
 
-    private fun stringifyDate(day: Int) : String {
+    fun stringifyDate(day: Int) : String {
         return if (day < 10) "0$day" else day.toString()
     }
 

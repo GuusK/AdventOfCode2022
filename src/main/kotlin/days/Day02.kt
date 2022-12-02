@@ -6,24 +6,20 @@ import resources.InputReader
 
 object Day02 : DayInterface {
 
-    override val number: Int
+    override val dayNumber: Int
         get() = 2
 
     val input = InputReader.getResourceLines(2)
+    val rounds = input.map { x -> x.split(" ") }
 
     override fun part1(): Any {
         var totalPoints = 0
-        for (line in input) {
-            val moves = line.split(" ")
+        for (moves in rounds) {
             val them = Shape.fromLetter(moves[0][0])
             val us = Shape.fromLetter(moves[1][0])
 
             totalPoints += us.points
-            if (us == Shape.winnerOf(them)) {
-                totalPoints += 6
-            } else if (us.points == them.points) {
-                totalPoints += 3
-            }
+            totalPoints += Outcome.determine(us, them).points
         }
 
         return totalPoints
@@ -31,8 +27,7 @@ object Day02 : DayInterface {
 
     override fun part2(): Any {
         var totalPoints = 0
-        for (line in input) {
-            val moves = line.split(" ")
+        for (moves in rounds) {
             val them = Shape.fromLetter(moves[0][0])
             val outcome = Outcome.fromLetter(moves[1][0])
 

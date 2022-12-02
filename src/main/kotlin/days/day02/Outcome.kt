@@ -8,12 +8,22 @@ enum class Outcome(val points: Int) {
     companion object {
         fun fromLetter(letter: Char): Outcome {
             if (letter == 'X') {
-                return Lose;
+                return Lose
             }
             if (letter == 'Y') {
-                return Draw;
+                return Draw
             }
             return Win
+        }
+
+        fun determine(us: Shape, them: Shape): Outcome {
+            if(us == Shape.winnerOf(them)){
+                return Win
+            }
+            if (us == them){
+                return Draw
+            }
+            return Lose
         }
     }
 }

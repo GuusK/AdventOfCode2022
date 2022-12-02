@@ -21,7 +21,7 @@ fun run(day: DayInterface) {
     val start1 = System.currentTimeMillis()
     val p1 = day.part1()
     val dur1 = System.currentTimeMillis() - start1
-    println("Ran day ${day.number}")
+    println("Ran day ${day.dayNumber}")
     println("Part 1: $p1")
     println("Part 1 took $dur1 ms")
 
