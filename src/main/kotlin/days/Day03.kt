@@ -14,7 +14,9 @@ object Day03 : DayInterface {
         } + (char.lowercaseChar() - 'a')
     }
 
-    val input = InputReader.getResourceLines(3)
+    val input by lazy {
+        InputReader.getResourceLines(3)
+    }
 
     override fun part1(): Any {
         var score = 0

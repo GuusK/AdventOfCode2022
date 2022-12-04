@@ -16,6 +16,9 @@ fun main(args: Array<String>) {
 
     if (day in days.indices) {
         run(days[day])
+    } else {
+        days.indices
+            .forEach { x -> run(days[x]) }
     }
 }
 

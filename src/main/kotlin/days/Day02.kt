@@ -9,8 +9,10 @@ object Day02 : DayInterface {
     override val dayNumber: Int
         get() = 2
 
-    val input = InputReader.getResourceLines(2)
-    val rounds = input.map { x -> x.split(" ") }
+    val rounds by lazy {
+        val input = InputReader.getResourceLines(2)
+        input.map { x -> x.split(" ") }
+    }
 
     override fun part1(): Any {
         var totalPoints = 0

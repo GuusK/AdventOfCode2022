@@ -6,7 +6,7 @@ object Day01 : DayInterface {
     override val dayNumber: Int
         get() = 1
 
-    private val totalCalories: List<Int> =
+    private val totalCalories: List<Int> by lazy {
         InputReader.getResourceString(1)
             .split("\n\n")
             .map { calorieLst ->
@@ -15,6 +15,7 @@ object Day01 : DayInterface {
                     .filter { x -> x.isNotEmpty() }
                     .sumOf { posInt -> posInt.toInt() }
             }
+    }
 
     override fun part1(): Any {
         return totalCalories.maxOrNull() ?: -1
