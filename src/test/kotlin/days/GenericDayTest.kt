@@ -21,11 +21,11 @@ abstract class GenericDayTest(private val dayNum: Int) {
         } returns InputReader.getResourceString(exampleFileLocation)
     }
 
-    fun part1(day: DayInterface, expected: Int){
+    fun part1(day: DayInterface, expected: Any){
         Assertions.assertEquals(expected, day.part1())
     }
 
-    fun part2(day: DayInterface, expected: Int){
+    fun part2(day: DayInterface, expected: Any){
         Assertions.assertEquals(expected, day.part2())
     }
 }
