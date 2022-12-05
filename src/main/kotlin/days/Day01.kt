@@ -7,7 +7,7 @@ object Day01 : DayInterface {
         get() = 1
 
     private val totalCalories: List<Int> by lazy {
-        InputReader.getResourceString(1)
+        InputReader.getResourceString(dayNumber)
             .split("\n\n")
             .map { calorieLst ->
                 calorieLst

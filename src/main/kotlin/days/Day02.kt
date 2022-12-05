@@ -10,7 +10,7 @@ object Day02 : DayInterface {
         get() = 2
 
     val rounds by lazy {
-        val input = InputReader.getResourceLines(2)
+        val input = InputReader.getResourceLines(dayNumber)
         input.map { x -> x.split(" ") }
     }
 

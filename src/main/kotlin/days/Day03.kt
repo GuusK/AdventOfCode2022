@@ -15,7 +15,7 @@ object Day03 : DayInterface {
     }
 
     val input by lazy {
-        InputReader.getResourceLines(3)
+        InputReader.getResourceLines(dayNumber)
     }
 
     override fun part1(): Any {

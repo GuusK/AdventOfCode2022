@@ -14,7 +14,7 @@ object Day04 : DayInterface {
     }
 
     private val parsed: List<Pair<Set<Int>, Set<Int>>> by lazy {
-        val input = InputReader.getResourceLines(4)
+        val input = InputReader.getResourceLines(dayNumber)
         input.map { line ->
             val (e1, e2) = line.split(",")
             val elf1 = elfRange(e1).toSet()
