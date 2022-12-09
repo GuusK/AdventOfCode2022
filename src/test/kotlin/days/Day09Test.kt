@@ -19,8 +19,14 @@ class Day09Test : GenericDayTest(9) {
     @Test
     fun example2(){
         Day09.readInput(InputReader.getResourceLines("./input/day09example2.txt"))
-        
         part2(Day09, 36)
+    }
+    
+    @Test
+    fun input(){
+        Day09.readInput(InputReader.getResourceLines("./input/day09.txt"))
+        part1(Day09, 6256)
+        part2(Day09, 2665)
     }
     
 }

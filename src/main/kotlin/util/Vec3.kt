@@ -11,6 +11,10 @@ data class Vec3(var x: Int, var y: Int, var z: Int) {
     operator fun plus(other: Vec3): Vec3 {
         return Vec3(this.x + other.x, this.y + other.y, this.z + other.z)
     }
+    
+    operator fun minus(other: Vec3): Vec3 {
+        return Vec3(this.x - other.x, this.y - other.y, this.z - other.z)
+    }
 
     fun touching(that: Vec3): Boolean {
         return kotlin.math.abs(this.x - that.x) <= 1
