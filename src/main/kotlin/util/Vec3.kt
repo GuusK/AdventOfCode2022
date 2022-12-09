@@ -1,17 +1,24 @@
 package util
 
-import java.math.BigInteger
 import kotlin.math.min
 
-data class Vec3(var x: Int,var y: Int,var z: Int) {
+data class Vec3(var x: Int, var y: Int, var z: Int) {
 
-    constructor(): this(0,0,0)
+    constructor() : this(0, 0, 0)
+
+    constructor(x: Int, y: Int) : this(x, y, 0)
 
     operator fun plus(other: Vec3): Vec3 {
         return Vec3(this.x + other.x, this.y + other.y, this.z + other.z)
     }
 
-    fun inverse(): Vec3{
+    fun touching(that: Vec3): Boolean {
+        return kotlin.math.abs(this.x - that.x) <= 1
+                && kotlin.math.abs(this.y - that.y) <= 1
+                && kotlin.math.abs(this.z - that.z) <= 1
+    }
+    
+    fun inverse(): Vec3 {
         return Vec3(-x, -y, -z)
     }
 
@@ -19,11 +26,11 @@ data class Vec3(var x: Int,var y: Int,var z: Int) {
         return x * y * z
     }
 
-    fun abs(): Vec3{
+    fun abs(): Vec3 {
         return Vec3(kotlin.math.abs(x), kotlin.math.abs(y), kotlin.math.abs(z))
     }
 
-    fun sum(): Int{
+    fun sum(): Int {
         return x + y + z
     }
 
@@ -32,7 +39,7 @@ data class Vec3(var x: Int,var y: Int,var z: Int) {
     }
 
     operator fun get(idx: Int): Int {
-        return when(idx){
+        return when (idx) {
             0 -> x
             1 -> y
             2 -> z
@@ -40,8 +47,8 @@ data class Vec3(var x: Int,var y: Int,var z: Int) {
         }
     }
 
-    operator fun set(idx: Int, value: Int){
-        when(idx){
+    operator fun set(idx: Int, value: Int) {
+        when (idx) {
             0 -> x = value
             1 -> y = value
             2 -> z = value
@@ -49,7 +56,7 @@ data class Vec3(var x: Int,var y: Int,var z: Int) {
         }
     }
 
-    fun containsZero(): Boolean{
+    fun containsZero(): Boolean {
         return x == 0 || y == 0 || z == 0
     }
 
@@ -73,17 +80,17 @@ data class Vec3(var x: Int,var y: Int,var z: Int) {
     }
 
     private fun lcm(first: Long, second: Long): Long {
-        return first* (second / gcd(first, second))
+        return first * (second / gcd(first, second))
     }
 
     fun lcm(): Long {
-        return lcm(lcm(x.toLong(),y.toLong()), z.toLong())
+        return lcm(lcm(x.toLong(), y.toLong()), z.toLong())
     }
 
     companion object {
-        fun fromList(nums: List<Int>): Vec3{
+        fun fromList(nums: List<Int>, until: Int): Vec3 {
             val res = Vec3()
-            for (idx in 0..min(2, nums.size)){
+            for (idx in 0..min(min(until, nums.size), 3)) {
                 res[idx] = nums[idx]
             }
             return res
