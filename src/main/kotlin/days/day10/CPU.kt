@@ -1,6 +1,6 @@
 package days.day10
 
-class CPU(val operations: List<Operation>) {
+class CPU(private val operations: List<Operation>) {
 
     private var register: Int = 1
     private var cycle: Int = 0
@@ -11,7 +11,7 @@ class CPU(val operations: List<Operation>) {
     private val crtHeight = 6
     private val crt: Array<Array<Char>> = Array(crtHeight) { Array(crtWidth) { '-' } }
 
-    private fun determinceCrtWriteValue(): Char {
+    private fun determineCRTValue(): Char {
         return if (cycle % crtWidth in register - 1..register + 1) {
             '█'
         } else {
@@ -20,7 +20,7 @@ class CPU(val operations: List<Operation>) {
     }
 
     private fun incrementCycle() {
-        crt[cycle / crtWidth][cycle % crtWidth] = determinceCrtWriteValue()
+        crt[cycle / crtWidth][cycle % crtWidth] = determineCRTValue()
         cycle++
         if (cycle % 40 == 20) {
             signalStrengths[cycle] = register * cycle
