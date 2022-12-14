@@ -34,10 +34,10 @@ object Day13 : DayInterface {
         }
     }
 
+    val input = InputReader.getResourceString(13)
+
     override fun part1(): Any {
-        val input = InputReader
-            .getResourceString(13)
-            .split("\n\n")
+        val input = input.split("\n\n")
         val parsed = input.map { pair ->
             pair
                 .split("\n")
@@ -54,7 +54,7 @@ object Day13 : DayInterface {
     }
 
     override fun part2(): Any {
-        val input = InputReader.getResourceLines(13) + "[[2]]" + "[[6]]"
+        val input = input.split("\n") + "[[2]]" + "[[6]]"
         val parsed = input
             .filter { it.isNotEmpty() }
             .map { line -> Node.fromString(line) }
