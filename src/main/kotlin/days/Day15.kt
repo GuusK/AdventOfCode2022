@@ -77,24 +77,21 @@ object Day15 : DayInterface {
                 }
             }
         }
-//        throw IllegalStateException("There should be atleast one possible location")
         return Point(-1,-1)
     }
 
     override fun part1(): Any {
-//        val input = InputReader.getResourceLines("./input/day15example.txt")
-        val input = InputReader.getResourceLines("./input/day15.txt")
+        val input = InputReader.getResourceLines(dayNumber)
         val parsed = input.map(SensorBeaconRange::fromString)
 
         val (xlims, ylims) = findDims(parsed)
         println("$xlims, $ylims")
-
-//        return countImpossibleLocations(10, xlims.first, xlims.second, parsed)
+        
         return countImpossibleLocations(2000000, xlims.first, xlims.second, parsed)
     }
 
     override fun part2(): Any {
-        val input = InputReader.getResourceLines("./input/day15.txt")
+        val input = InputReader.getResourceLines(dayNumber)
         val sbrs = input.map(SensorBeaconRange::fromString)
 
         val loc= findDistressSignal(sbrs, 0, 4000000)
