@@ -25,7 +25,7 @@ object Day16 : DayInterface {
             }
         }
     }
-    
+
     data class FindLengthNode(val valve: Valve, val length: Int)
 
     fun findPathLength(valves: Map<String, Valve>, from: Valve, to: Valve, maxLength: Int): Int {
@@ -57,26 +57,14 @@ object Day16 : DayInterface {
         val opened: Set<String>,
     )
 
-    override fun part1(): Any {
-        val input = InputReader.getResourceLines(16)
-        val valves = input.map { Valve.fromString(it) }.associateBy { it.id }
-        val nonZeroValves = valves.values
-            .filter { it.flow != 0 }
-            .toSet()
-        val nonZeroValvesIds = nonZeroValves.map { it.id }.toSet()
-        val distances = mutableMapOf<Pair<String, String>, Int>()
-
-        for (from in nonZeroValves + valves["AA"]!!) {
-            for (to in nonZeroValves) {
-                if (from == to) {
-                    continue
-                }
-                distances[from.id to to.id] = findPathLength(valves, from, to, 30)
-            }
-        }
-
-        val deque = ArrayDeque(listOf(DistState("AA", 30, 0, setOf("AA"))))
-        var maxFlow = DistState("EMPTY", 30, 0, setOf())
+    fun findMaxFlowPath(
+        nonZeroValvesIds: Set<String>,
+        valves: Map<String, Valve>,
+        distances: Map<Pair<String, String>, Int>,
+        startTime: Int
+    ): DistState {
+        val deque = ArrayDeque(listOf(DistState("AA", startTime, 0, setOf("AA"))))
+        var maxFlow = DistState("EMPTY", startTime, 0, setOf())
         while (deque.isNotEmpty()) {
             val cur = deque.removeFirst()
             val leftToVisit = nonZeroValvesIds.minus(cur.opened)
@@ -86,7 +74,7 @@ object Day16 : DayInterface {
                 .map { valves[it]!!.flow * cur.timeleft }
                 .sum()
 
-            if (cur.sumFlow + maxLeft < maxFlow.sumFlow){
+            if (cur.sumFlow + maxLeft < maxFlow.sumFlow) {
                 continue
             }
 
@@ -105,15 +93,54 @@ object Day16 : DayInterface {
                 }
                 if (nextState.sumFlow > maxFlow.sumFlow) {
                     maxFlow = nextState
-                    println("New max: $nextState")
                 }
             }
         }
+        return maxFlow
+    }
 
-        return maxFlow.sumFlow
+    override fun part1(): Any {
+        val input = InputReader.getResourceLines(16)
+        val valves = input.map { Valve.fromString(it) }.associateBy { it.id }
+        val nonZeroValves = valves.values
+            .filter { it.flow != 0 }
+            .toSet()
+        val nonZeroValvesIds = nonZeroValves.map { it.id }.toSet()
+        val distances = mutableMapOf<Pair<String, String>, Int>()
+
+        for (from in nonZeroValves + valves["AA"]!!) {
+            for (to in nonZeroValves) {
+                if (from == to) {
+                    continue
+                }
+                distances[from.id to to.id] = findPathLength(valves, from, to, 30)
+            }
+        }
+
+        return findMaxFlowPath(nonZeroValvesIds, valves, distances, 30).sumFlow
     }
 
     override fun part2(): Any {
-        return -1
+        val input = InputReader.getResourceLines(16)
+        val valves = input.map { Valve.fromString(it) }.associateBy { it.id }
+        val nonZeroValves = valves.values
+            .filter { it.flow != 0 }
+            .toSet()
+        var nonZeroValvesIds = nonZeroValves.map { it.id }.toSet()
+        val distances = mutableMapOf<Pair<String, String>, Int>()
+        for (from in nonZeroValves + valves["AA"]!!) {
+            for (to in nonZeroValves) {
+                if (from == to) {
+                    continue
+                }
+                distances[from.id to to.id] = findPathLength(valves, from, to, 30)
+            }
+        }
+        val startTime = 26
+        val manState = findMaxFlowPath(nonZeroValvesIds, valves, distances, startTime)
+        nonZeroValvesIds = nonZeroValves.minus(manState.opened.map { valves[it]!! }.toSet()).map { it.id }.toSet()
+        
+        val elephantState = findMaxFlowPath(nonZeroValvesIds, valves, distances, startTime)
+        return elephantState.sumFlow + manState.sumFlow
     }
 }
