@@ -15,7 +15,7 @@ fun stringToListOfDigits(input: String): List<Int> {
 }
 
 
-val regex: Regex = Regex("\\d+")
+val regex: Regex = Regex("-?\\d+")
 
 fun allInts(input: String): List<Int> {
     return regex.findAll(input).map { it.value.toInt() }.toList()

@@ -6,8 +6,12 @@ import kotlin.math.sqrt
 
 data class Point(val x: Int, val y: Int) {
 
-    fun manhattenDistance(): Int {
+    fun manhattanDistance(): Int {
         return abs(x) + abs(y)
+    }
+    
+    fun manhattanDistance(other: Point): Int {
+        return abs(this.x - other.x) + abs(this.y - other.y) 
     }
 
     fun dist(other: Point): Double{
