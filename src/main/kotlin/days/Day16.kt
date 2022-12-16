@@ -25,89 +25,95 @@ object Day16 : DayInterface {
             }
         }
     }
+    
+    data class FindLengthNode(val valve: Valve, val length: Int)
 
-    data class State(
+    fun findPathLength(valves: Map<String, Valve>, from: Valve, to: Valve, maxLength: Int): Int {
+        val visited = mutableSetOf<String>()
+        val deque = ArrayDeque(listOf(FindLengthNode(from, 0)))
+        var minLength = maxLength
+        while (deque.isNotEmpty()) {
+            val cur = deque.removeFirst()
+            if (cur.valve.id == to.id) {
+                if (cur.length < minLength) {
+                    minLength = cur.length
+                }
+            }
+            if (visited.contains(cur.valve.id) || minLength < cur.length) {
+                continue
+            }
+            visited.add(cur.valve.id)
+            for (next in cur.valve.leadsTo) {
+                deque.add(FindLengthNode(valves[next]!!, cur.length + 1))
+            }
+        }
+        return minLength
+    }
+
+    data class DistState(
         val curValve: String,
         val timeleft: Int,
         val sumFlow: Int,
-        val opened: List<String>,
-        val pathSinceLastOpened: List<String>
+        val opened: Set<String>,
     )
 
     override fun part1(): Any {
-//        val input = InputReader.getResourceLines("./input/day16prutsen")
-//        val input = InputReader.getResourceLines("./input/day16example.txt")
         val input = InputReader.getResourceLines(16)
-
         val valves = input.map { Valve.fromString(it) }.associateBy { it.id }
-
-        val sortedFlowValves = valves.values
+        val nonZeroValves = valves.values
             .filter { it.flow != 0 }
-            .sortedByDescending { it.flow }
-            .map { it.id }
             .toSet()
+        val nonZeroValvesIds = nonZeroValves.map { it.id }.toSet()
+        val distances = mutableMapOf<Pair<String, String>, Int>()
 
-        val bfs = ArrayDeque(listOf(State("AA", 30, 0, listOf(), listOf())))
-
-        var maxRelease = State("", -1, 0, listOf(), listOf())
-        while (bfs.isNotEmpty()) {
-            val curState = bfs.removeFirst()
-
-            println("Curstate: $curState")
-
-            // stop conditions
-            if (curState.opened.toSet() == sortedFlowValves || curState.timeleft <= 0) {
-                if (curState.sumFlow > maxRelease.sumFlow) {
-                    maxRelease = curState
+        for (from in nonZeroValves + valves["AA"]!!) {
+            for (to in nonZeroValves) {
+                if (from == to) {
+                    continue
                 }
-                continue
-            }
-
-            val toBeOpened = sortedFlowValves.minus(curState.opened.toSet())
-            if (toBeOpened.sumOf { valves[it]!!.flow * curState.timeleft } + curState.sumFlow < maxRelease.sumFlow) {
-                // not possible to get higher result, so we can drop this state
-                continue
-            }
-
-            val curValve = valves[curState.curValve]!!
-            // Open current valve
-            if (!curState.opened.contains(curState.curValve) && sortedFlowValves.contains(curState.curValve)) {
-                val newState = State(
-                    curState.curValve,
-                    curState.timeleft - 1,
-                    curState.sumFlow + (curState.timeleft - 1) * curValve.flow,
-                    curState.opened + curValve.id,
-                    listOf()
-                )
-                bfs.addLast(newState)
-                if (newState.sumFlow > maxRelease.sumFlow) {
-                    maxRelease = newState
-                }
-            }
-            for (nextValve in curValve.leadsTo) {
-                // Check for cycle
-                if (!curState.pathSinceLastOpened.contains(nextValve)) {
-                    // Moving to next valve
-                    bfs.addLast(
-                        State(
-                            nextValve, curState.timeleft - 1, curState.sumFlow,
-                            curState.opened, curState.pathSinceLastOpened + curValve.id
-                        )
-                    )
-                } else {
-                    // cycle detected, so ending
-                    if (curState.sumFlow > maxRelease.sumFlow) {
-                        maxRelease = curState
-                    }
-                }
-
+                distances[from.id to to.id] = findPathLength(valves, from, to, 30)
             }
         }
 
-        return maxRelease.sumFlow
+        val deque = ArrayDeque(listOf(DistState("AA", 30, 0, setOf("AA"))))
+        var maxFlow = DistState("EMPTY", 30, 0, setOf())
+        while (deque.isNotEmpty()) {
+            val cur = deque.removeFirst()
+            val leftToVisit = nonZeroValvesIds.minus(cur.opened)
+
+            // Generous calculation of how much to still try and get
+            val maxLeft = leftToVisit
+                .map { valves[it]!!.flow * cur.timeleft }
+                .sum()
+
+            if (cur.sumFlow + maxLeft < maxFlow.sumFlow){
+                continue
+            }
+
+            for (next in leftToVisit) {
+                val nextValve = valves[next]!!
+                val distance = distances[cur.curValve to next]!!
+                val nextState = DistState(
+                    next,
+                    cur.timeleft - distance - 1,
+                    cur.sumFlow + nextValve.flow * (cur.timeleft - distance - 1),
+                    cur.opened + next
+                )
+
+                if (nextState.opened.size < nonZeroValvesIds.size) {
+                    deque.addLast(nextState)
+                }
+                if (nextState.sumFlow > maxFlow.sumFlow) {
+                    maxFlow = nextState
+                    println("New max: $nextState")
+                }
+            }
+        }
+
+        return maxFlow.sumFlow
     }
 
     override fun part2(): Any {
-        TODO("Not yet implemented")
+        return -1
     }
 }
