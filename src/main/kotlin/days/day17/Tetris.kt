@@ -1,32 +1,33 @@
 package days.day17
 
-import util.PointL
+import util.Point
 import java.lang.IllegalArgumentException
 import kotlin.math.max
 
-class Tetris(val jetstream: String) {
+class Tetris(private val jetstream: String) {
 
     private val shapesWithStartingLoc = listOf(
-        setOf(PointL(2, 0), PointL(3, 0), PointL(4, 0), PointL(5, 0)), // -
-        setOf(PointL(2, 1), PointL(3, 1), PointL(4, 1), PointL(3, 0), PointL(3, 2)), // +
-        setOf(PointL(2, 0), PointL(3, 0), PointL(4, 0), PointL(4, 1), PointL(4, 2)), // mirror(L)
-        setOf(PointL(2, 0), PointL(2, 1), PointL(2, 2), PointL(2, 3)), // |
-        setOf(PointL(2, 0), PointL(2, 1), PointL(3, 0), PointL(3, 1)), // █
+        setOf(Point(2, 0), Point(3, 0), Point(4, 0), Point(5, 0)), // -
+        setOf(Point(2, 1), Point(3, 1), Point(4, 1), Point(3, 0), Point(3, 2)), // +
+        setOf(Point(2, 0), Point(3, 0), Point(4, 0), Point(4, 1), Point(4, 2)), // _|
+        setOf(Point(2, 0), Point(2, 1), Point(2, 2), Point(2, 3)), // |
+        setOf(Point(2, 0), Point(2, 1), Point(3, 0), Point(3, 1)), // █
     )
 
-    val left = PointL(-1, 0)
-    val down = PointL(0, -1)
-    val right = PointL(1, 0)
-    var tip = 0L
-    var offsetTip = 0L
-    val occupied = mutableSetOf<PointL>()
+    private val left = Point(-1, 0)
+    private val down = Point(0, -1)
+    private val right = Point(1, 0)
+    private var tip = 0
+    private var offsetTip = 0L
+    private val occupied = mutableSetOf<Point>()
 
-    fun moveShape(shape: Set<PointL>, movement: PointL): Pair<Status, Set<PointL>> {
+    private fun moveShape(shape: Set<Point>, movement: Point): Pair<Status, Set<Point>> {
         val nextPos = shape.map { it + movement }.toSet()
         return if (nextPos.any { it.x < 0L || it.x > 6L }) {
             Pair(Status.NotMoved, shape)
         } else if (nextPos.any { it.y < 0L } || occupied.intersect(nextPos).isNotEmpty()) {
-            // Some collisions happen, so the shape cannot move and is stored
+            // Some collisions happen, so the shape cannot move
+            // only store if it cannot move it wants to go down
             if (movement == down) {
                 occupied.addAll(shape)
                 Pair(Status.Stopped, shape)
@@ -40,16 +41,18 @@ class Tetris(val jetstream: String) {
     
     fun run(limObjects: Long) : Long {
         var jetIdx = 0
-        val tips = mutableListOf<Long>()
+        val tips = mutableListOf<Int>()
         val objectIds = mutableListOf<Long>()
         var objectIdx = 0L
         while (objectIdx < limObjects) {
             val shapeIdx = (objectIdx % shapesWithStartingLoc.size).toInt()
             var shape = shapesWithStartingLoc[shapeIdx].toSet()
-            var res = moveShape(shape, PointL(0, tip + 3))
+            var res = moveShape(shape, Point(0, tip + 3))
             shape = res.second
             while (true) {
                 // Check for cycle
+                // 3 works for both my input and example, as it is only present once in a cycle 
+                // might be different for you
                 if (jetIdx == 0 && shapeIdx == 3 && tip < 100000) {
                     // From here there will be repetition
                     tips.add(tip)
