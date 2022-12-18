@@ -9,7 +9,7 @@ object Day18 : DayInterface {
         get() = 18
 
     override fun part1(): Any {
-        val input = InputReader.getResourceLines("./input/day18.txt")
+        val input = InputReader.getResourceLines(dayNumber)
         val parsed = input.map { Vec3.fromList(allInts(it)) }.toSet()
 
         return parsed.map { droplet ->
@@ -37,13 +37,13 @@ object Day18 : DayInterface {
             }
             val (collisions, free) = neighbors.partition { points.contains(it) }
             outsideCount += collisions.size
-            queue.addAll(free.toSet().minus(visited))
+            queue.addAll(free)
         }
         return outsideCount
     }
 
     override fun part2(): Any {
-        val input = InputReader.getResourceLines("./input/day18example2.txt")
+        val input = InputReader.getResourceLines(18)
         val parsed = input.map { Vec3.fromList(allInts(it)) }.toSet()
 
         var min = Vec3(Int.MAX_VALUE, Int.MAX_VALUE, Int.MAX_VALUE)

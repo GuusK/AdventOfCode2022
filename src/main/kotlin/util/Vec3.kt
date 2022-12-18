@@ -20,7 +20,7 @@ data class Vec3(var x: Int, var y: Int, var z: Int) {
     private fun compareVals(that: Vec3, operator: (Int, Int) -> Int): Vec3 {
         val resX = operator(this.x, that.x)
         val resY = operator(this.y, that.y)
-        val resZ = operator(this.y, that.y)
+        val resZ = operator(this.z, that.z)
         return Vec3(resX, resY, resZ)
     }
     
