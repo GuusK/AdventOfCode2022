@@ -21,6 +21,7 @@ val days = listOf(
     Day18,
     Day19,
     Day20,
+    Day21,
 )
 
 fun main(args: Array<String>) {
