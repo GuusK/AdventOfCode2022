@@ -10,6 +10,13 @@ data class ShoutingMonkey(
     val right: String?,
     val operation: Char
 ) {
+    override fun toString() : String {
+        if(type == MonkeyType.Number){
+            return num.toString()
+        } else {
+            return " " + operation + " "
+        }
+    }
     companion object {
         fun fromString(line: String): ShoutingMonkey {
             val splitted = line.split(":")
