@@ -1,8 +1,6 @@
 package util
 
-import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.sqrt
+import kotlin.math.*
 
 data class Point(val x: Int, val y: Int) {
 
@@ -29,11 +27,11 @@ data class Point(val x: Int, val y: Int) {
     }
     
     fun minVals(that: Point): Point {
-        return Point(Math.min(this.x, that.x), Math.min(this.y, that.y))
+        return Point(min(this.x, that.x), min(this.y, that.y))
     }
 
     fun maxVals(that: Point): Point {
-        return Point(Math.max(this.x, that.x), Math.max(this.y, that.y))
+        return Point(max(this.x, that.x), max(this.y, that.y))
     }
     
     fun fourNeighbors(): List<Point> {

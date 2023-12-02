@@ -1,38 +1,61 @@
 package days
 
-import days.day23.Move
 import resources.InputReader
 import util.Point
-import java.lang.IllegalStateException
 
 object Day23 : DayInterface {
     override val dayNumber: Int
         get() = 23
 
-    val spotsToCheck = listOf(
-        listOf(Point(-1, 1), Point(0, 1), Point(1, 1)), // check NW, N, NE
-        listOf(Point(-1, -1), Point(0, -1), Point(1, -1)), // check SW,S,SE
-        listOf(Point(-1, -1), Point(-1, 0), Point(-1, 1)), // check SW,W,NW
-        listOf(Point(1, -1), Point(1, 0), Point(1, 1)), // check NE,E,SE
-    )
-    
-    data class ProposedMove(val propose: Elf, val origin: Elf)
-    data class Elf(val location: Point, val directionIdx: Int) {
-        fun move(idx: Int): Elf {
-            val point = Move.byIndex(idx).movement
-            return Elf(location + point, (directionIdx + idx + 1) % spotsToCheck.size )
+    val parsed = InputReader.getResourceLines(23)
+        .reversed()
+        .withIndex()
+        .map { (lineIdx, line) ->
+            line.withIndex()
+                .filter { it.value == '#' }
+                .map { Point(it.index, lineIdx) }
+        }.flatten()
+
+    enum class Direction(val point: Point) {
+        NORTH(Point(0, 1)),
+        SOUTH(Point(0, -1)),
+        EAST(Point(1, 0)),
+        WEST(Point(-1, 0));
+
+        operator fun plus(other: Direction): Point {
+            return this.point + other.point
         }
     }
 
-    fun countEmptyAndPrintMap(lst: List<Elf>): Int {
-        val locs = lst.map { it.location }
-        val mins = locs.reduce(Point::minVals)
-        val maxs = locs.reduce(Point::maxVals)
+    data class DirectionSpots(val direction: Direction, val spots: List<Point>)
+
+    val spotsToCheck: List<DirectionSpots> = listOf(
+        DirectionSpots(
+            Direction.NORTH,
+            listOf(Direction.NORTH + Direction.WEST, Direction.NORTH.point, Direction.NORTH + Direction.EAST)
+        ), // NW, N, NE
+        DirectionSpots(
+            Direction.SOUTH,
+            listOf(Direction.SOUTH + Direction.WEST, Direction.SOUTH.point, Direction.SOUTH + Direction.EAST)
+        ), // SW,S,SE
+        DirectionSpots(
+            Direction.WEST,
+            listOf(Direction.NORTH + Direction.WEST, Direction.WEST.point, Direction.SOUTH + Direction.WEST)
+        ), // NW, W, SW
+        DirectionSpots(
+            Direction.EAST,
+            listOf(Direction.NORTH + Direction.EAST, Direction.EAST.point, Direction.SOUTH + Direction.EAST)
+        ), // NE, E, SE
+    )
+
+    fun countEmptyAndPrintMap(lst: List<Point>): Int {
+        val mins = lst.reduce(Point::minVals)
+        val maxs = lst.reduce(Point::maxVals)
         var empty = 0
         println("=========")
-        for (y in maxs.y downTo mins.y - 1) {
+        for (y in maxs.y downTo mins.y) {
             for (x in mins.x..maxs.x) {
-                if (locs.contains(Point(x, y))) {
+                if (lst.contains(Point(x, y))) {
                     print('#')
                 } else {
                     print('.')
@@ -45,63 +68,83 @@ object Day23 : DayInterface {
         return empty
     }
 
+    fun addElfToLocation(proposals: MutableMap<Point, MutableSet<Point>>, target: Point, origin: Point) {
+        if (!proposals.contains(target)) {
+            proposals.put(target, mutableSetOf())
+        }
+        proposals[target]!!.add(origin)
+    }
 
-    fun iterElves(elves: List<Elf>, rounds: Int): Int {
-        val curMap = elves.toMutableList()
-        for (round in 0 until rounds) {
-            val locations = curMap.map { it.location }
-            countEmptyAndPrintMap(curMap)
-            val proposed = curMap.map { elf ->
-                if (elf.location.eightNeighbors().none { locations.contains(it) }) {
-                    // No neighbors, so no movement
-                    println("no neighbors: " + ProposedMove(elf, elf))
-                    return@map ProposedMove(elf, elf)
-                } else {
-                    // No neighbor
-                    for (idx in 0 until spotsToCheck.size) {
-                        val directionToCheck = (idx + elf.directionIdx) % spotsToCheck.size
-                        if (spotsToCheck[directionToCheck].map { it + elf.location }
-                                .none { locations.contains(it) }) {
-                            // Empty spots in direction idx
-                            println(
-                                "No neighbors in direction ${Move.byIndex(directionToCheck)}: $idx" + ProposedMove(
-                                    elf.move(directionToCheck), elf
-                                )
-                            )
-                            return@map ProposedMove(elf.move(directionToCheck), elf)
-                        }
+    fun doRounds(numRounds: Int, elfs: List<Point>, willRunUntillStable: Boolean = false): Pair<List<Point>, Int> {
+        var currentPositions = elfs
+        var round = 0
+        while (round < numRounds) {
+            if(round %10 == 0){
+                println("Starting round $round")
+            }
+
+            var haveElvesMoved = false
+            val proposals: MutableMap<Point, MutableSet<Point>> = mutableMapOf()
+
+            // Planning phase
+            for (elf in currentPositions) {
+                // Are there any neighbors?
+                if (elf.eightNeighbors().none { currentPositions.contains(it) }) {
+                    // This elf has no neighbors, so will do nothing
+                    addElfToLocation(proposals, elf, elf)
+                    continue
+                }
+
+                // Let's check in different directions
+                var hasProposedMove = false
+                for (idx in 0..spotsToCheck.size) {
+                    val directionSpots = spotsToCheck[(idx + round) % spotsToCheck.size]
+                    val locs = directionSpots.spots.map { it + elf }
+                    if (locs.none { currentPositions.contains(it) }) {
+                        addElfToLocation(proposals, elf + directionSpots.direction.point, elf)
+                        haveElvesMoved = true
+                        hasProposedMove = true
+                        break
                     }
-                    // should never happen
-                    throw IllegalStateException("Not free laying, but no free direction")
+                }
+                // If no move is valid, the elf stays in the same place
+                if (!hasProposedMove) {
+                    addElfToLocation(proposals, elf, elf)
                 }
             }
-            val grouped = proposed.groupBy { it.propose }
-            curMap.clear()
-            val t = grouped.map { pp ->
-                if (pp.value.size > 1) {
-                    pp.value.map { it.origin }
+
+            // Execute movement
+            val result: MutableList<Point> = mutableListOf()
+            proposals.entries.map { (target, origins) ->
+                // Size 0 shouldnt happen, as sets are only added when there's atleast one location
+                if (origins.size == 1) {
+                    result.add(target)
                 } else {
-                    listOf(pp.value[0].propose)
+                    // multiple elves want to move here, so they stay on original location
+                    result.addAll(origins)
                 }
-            }.flatten()
-            curMap.addAll(t)
+            }
+
+            // Movement is done, so we prepare for next round
+            currentPositions = result
+            round += 1
+            if(!haveElvesMoved && willRunUntillStable){
+                return Pair(currentPositions, round)
+            }
         }
-        return countEmptyAndPrintMap(curMap)
+        return Pair(currentPositions, round)
     }
 
     override fun part1(): Any {
-        val input = InputReader.getResourceLines("./input/day23example2.txt")
-        val parsed = input.reversed()
-            .withIndex()
-            .map { (lineIdx, line) ->
-                line.withIndex()
-                    .filter { it.value == '#' }
-                    .map { Elf(Point(it.index, lineIdx), 0) }
-            }.flatten()
-        return iterElves(parsed, 2)
+        val res = doRounds(10, parsed, false)
+
+        return countEmptyAndPrintMap(res.first)
     }
 
     override fun part2(): Any {
-        TODO("Not yet implemented")
+        val res = doRounds(Int.MAX_VALUE, parsed, true)
+
+        println("Took ${res.second} rounds")
+        return res.second
     }
 }
